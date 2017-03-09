@@ -2,10 +2,18 @@ from collections import defaultdict
 import re
 import en
 from random import randint
+from nltk import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import wordnet
+from nltk.tokenize.moses import MosesDetokenizer
+import HTMLParser
+
 
 #This function takes a tweet and returns text of the same tweet, but with all the negative sentiment words replaced with positive sentiment ones
 def positive_tweet(tweet):
-    text = nltk.word_tokenize(tweet.text)
+    #flag to note if any changes were made
+    change_made = False
+    text = word_tokenize(tweet.text)
     #tags words by pos - (word, pos)
     tagged = en.sentence.tag(tweet.text)
     lemmatizer = WordNetLemmatizer()
@@ -13,13 +21,15 @@ def positive_tweet(tweet):
     mod_tweet = []
     for word in tagged:
         mod_word = check_replace(word[0], word[1], neg_words)
-        mod_tweet.append(mod_word)
+        mod_tweet.append(mod_word[0])
+        if mod_word[1] == True:
+            change_made = True
 
     detokenizer = MosesDetokenizer()
     final = detokenizer.detokenize(mod_tweet, return_str=True)
     final = HTMLParser.HTMLParser().unescape(final)
     
-    return final
+    return [final, change_made]
 
 #All other functions act in support of positive_tweet
 
@@ -94,7 +104,7 @@ def check_replace(word, pos, neg_words):
     mod_word = check_neg_pos_match(word, pos, neg_words, word)
     #if the word doesn't match, try its lem.
     if mod_word[0] == True:
-        return mod_word[1]
+        return [mod_word[1], True]
     else:
         try: 
             pos_lem = tld[pos]
@@ -103,16 +113,17 @@ def check_replace(word, pos, neg_words):
                 lem = lemmatizer.lemmatize(word, wordnet.VERB)
                 lem_match = check_neg_pos_match(lem, pos, neg_words, word)
                 if lem_match[0] == True:
-                    return lem_match[1]
+                    return [lem_match[1], True]
                 else:
-                    return mod_word[1]
+                    return [mod_word[1], False]
             else:
-                return mod_word[1]
+                return [mod_word[1], False]
         except:
-            return mod_word[1]
+            return [mod_word[1], False]
     
     
 def check_neg_pos_match(word_lem, pos_o, neg_words, original_word):
+    #flag to see if new word was chosen
     nwc =None
     word_l=word_lem.lower()
     #is the word in the negative words list?
