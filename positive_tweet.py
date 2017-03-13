@@ -12,8 +12,8 @@ from nltk.corpus import wordnet
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize.moses import MosesDetokenizer
 
-# This function takes a tweet and returns text of the same tweet, but
-# with all the negative sentiment words replaced with a random positive
+# This function takes a tweepy tweet object and returns text of the same tweet,
+# but with all the negative sentiment words replaced with a random positive
 # sentiment word matching it's part of speech(POS).
 
 

@@ -21,19 +21,20 @@ auth.set_access_token(access_token, access_token_secret)
 
 api = tweepy.API(auth)
 
+# Print the user name of the account.
 api_acc = api.me()
 print "Listening/Posting on account: " + api_acc.name
 
 
-# Post positive version of tweet.
+# Post positive version of tweet to account.
 def post_tweet(original_tweet):
     n = 0
     ptweet = positive_tweet(original_tweet)
     change_made = ptweet[1]
     posttweet = ptweet[0]
-    if change_made is True:
+    if change_made is True:  # if there are negative sentiment words replaced
         # Loop through and see if it comes up with a shorter tweet
-        # if over 140 characters.
+        # if currently over 140 characters.
         while n < 100 and len(posttweet) > 140:
             n = n + 1
             ptweet = positive_tweet(original_tweet)
@@ -44,7 +45,7 @@ def post_tweet(original_tweet):
         too_long = True
 
     # If the original tweet is the same as the modified one
-    # (no ngative words found), retweet the original.
+    # (no negative words found), retweet the original.
     # Otherwise, post the modified tweet.
     if change_made is False:
         print "Original Tweet was positive, so re-tweeted it."
@@ -57,9 +58,9 @@ def post_tweet(original_tweet):
             print "Original tweet text: " + original_tweet.text
             print "Positive tweet text: " + posttweet
         except:
-            print "All modified tweets were too long, no revised tweet posted."
+            print "Error posting tweet"
     else:
-        print "No modified tweets that were short enough were found."
+        print "All modified tweets generated were over 140 characters."
 
 
 # Stream posts from twitter and post positive tweets.
@@ -100,6 +101,7 @@ class MyStreamListener(tweepy.StreamListener):
         elif retweet is False and mention is False:
             print "Post was by this account. It will be ignored"
 
+# Initiate stream listener
 myStreamListener = MyStreamListener()
 myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
 # Using userstream will get all tweets of users followed by the account
