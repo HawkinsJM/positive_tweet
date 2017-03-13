@@ -4,7 +4,9 @@ from positive_tweet import positive_tweet
 
 import tweepy
 
-# Import API Keys.
+# Import API Keys for the account to listen and post to.
+# This account will look for tweets by the people it follows
+# and then post positive versions of those tweets.
 with open('positive_trump_creds.json') as creds:
     twitter_creds = json.load(creds)
 
@@ -19,13 +21,8 @@ auth.set_access_token(access_token, access_token_secret)
 
 api = tweepy.API(auth)
 
-# Listen to test account.
-username = 'jhtestacc'
-user = api.get_user(username)
-
 api_acc = api.me()
-print "Now listening to account: " + username
-print "Posting on account: " + api_acc.name
+print "Listening/Posting on account: " + api_acc.name
 
 
 # Post positive version of tweet.
@@ -66,13 +63,15 @@ def post_tweet(original_tweet):
 
 
 # Stream posts from twitter and post positive tweets.
+# The following setup posts positive versions of any tweets of
+# users followed by the account whos credentials we are using.
 class MyStreamListener(tweepy.StreamListener):
 
     def on_status(self, status):
-        # When an event is detected print the text of the event
-        # and then post the positive tweet.
+        # When an event is detected print alert.
         print("New tweet detected")
-        # Detect retweets so we can skip them
+        # Detect retweets so we can skip them.
+        # This ignores retweets posted by users the account follows.
         retweet = False
         try:
             status.retweeted_status
@@ -81,6 +80,8 @@ class MyStreamListener(tweepy.StreamListener):
         except AttributeError:
             pass
         # Detect mentions so we can skip them
+        # This ignores mentions of the account whos credentials we are using
+        # e.x. When people tweet at the account
         mention = False
         try:
             repl_id = status.in_reply_to_user_id_str
@@ -90,6 +91,8 @@ class MyStreamListener(tweepy.StreamListener):
         except AttributeError:
             pass
 
+        # If it is neither a retweet, a mention, or a post by the account
+        # itself, then postive a postive version of the tweet.
         if (retweet is False and
                 mention is False and
                 status.user.id is not api_acc.id):
@@ -99,4 +102,6 @@ class MyStreamListener(tweepy.StreamListener):
 
 myStreamListener = MyStreamListener()
 myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
+# Using userstream will get all tweets of users followed by the account
+# of the api credentials we are using.
 myStream.userstream("with=following")
