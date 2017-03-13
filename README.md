@@ -1,5 +1,5 @@
 #Positive Tweet
-The goal if this project was to automatically replace all negative words in @realDonaldTrumps tweets with positive words and post them as @pstvDonaldTrump.
+The goal if this project was to automatically replace all negative words in @realDonaldTrumps tweets with positive words and post them as [@pstvDonaldTrump](https://twitter.com/pstvDonaldTrump).
 
 #Make Tweets Positive (Again)
 A python program was developed to take any tweet, and replace all the negative sentiment words with positive sentiment words with a matching part-of-speech.
